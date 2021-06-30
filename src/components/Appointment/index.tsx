@@ -46,7 +46,7 @@ export function Appointment({ data, ...rest }: Props) {
             </Text>
 
             <Text style={styles.category} >
-              { category.title }
+              {category.title}
             </Text>
           </View>
 
@@ -55,20 +55,20 @@ export function Appointment({ data, ...rest }: Props) {
               <CalendarSvg />
 
               <Text style={styles.date} >
-                { data.date }
+                {data.date}
               </Text>
             </View>
-          </View>
 
-          <View style={styles.playersInfo} >
-            <PlayerSvg fill={ owner ? primary : on } />
+            <View style={styles.playersInfo} >
+              <PlayerSvg fill={owner ? primary : on} />
 
-            <Text style={[
+              <Text style={[
                 styles.player,
                 { color: owner ? primary : on }
               ]} >
-              { owner ? 'Anfitrião' : 'Visitante' }
-            </Text>
+                {owner ? 'Anfitrião' : 'Visitante'}
+              </Text>
+            </View>
           </View>
         </View>
 
