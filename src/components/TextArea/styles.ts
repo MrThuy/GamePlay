@@ -3,11 +3,14 @@ import { theme } from '../../global/styles/theme';
 
 export const styles = StyleSheet.create({
   container: {
-    width: '75%',
-    height: 1,
+    height: 95,
+    width: '100%',
     backgroundColor: theme.colors.secondary40,
-    marginTop: 2,
-    marginVertical: 31,
-    alignSelf: 'flex-end'
+    borderRadius: 8,
+    color: theme.colors.heading,
+    textAlign: 'center',
+    fontFamily: theme.fonts.text400,
+    fontSize: 13,
+    marginLeft: 4,
   }
 });
