@@ -8,19 +8,14 @@ import { AuthRoutes } from './auth.routes';
 
 import { Background } from "../components/Background";
 
-export function Routes(){
+export function Routes() {
   const { user } = useAuth();
 
-  return(
+  return (
 
-    <Background>
-      <NavigationContainer>
-        <AuthRoutes />
-      </NavigationContainer>
-    </Background>
+    <NavigationContainer>
+      {user.id ? <AuthRoutes /> : <SignIn />}
+    </NavigationContainer>
 
-    // <NavigationContainer>
-    //  { user.id ? <AuthRoutes /> : <SignIn /> }
-    // </NavigationContainer>
   )
 }

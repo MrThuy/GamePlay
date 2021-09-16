@@ -3,7 +3,7 @@ import {
   SCOPE,
   RESPONSE_TYPE,
   CLIENT_ID,
-  CND_IMAGE
+  CDN_IMAGE
 } from './discordAuth';
 
 export {
@@ -11,5 +11,5 @@ export {
   SCOPE,
   RESPONSE_TYPE,
   CLIENT_ID,
-  CND_IMAGE
+  CDN_IMAGE
 }

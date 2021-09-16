@@ -53,36 +53,28 @@ function AuthProvider({ children }: AuthProviderProps) {
     try {
       setLoading(true);
 
-      //const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
-      // const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
+      const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
+      //const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=873028732254814248&redirect_uri=https%3A%2F%2Fauth.expo.io%2F%40desenvolvimentometasis%2FGamePlay&response_type=token&scope=email%20connections%20guilds%20identify`;
 
-      // const { type, params } = await AuthSession.startAsync({ authUrl }) as AuthorizationResponse;
-      // console.log( authUrl );
+      const { type, params } = await AuthSession.startAsync({ authUrl }) as AuthorizationResponse;
 
-      // const response = await AuthSession.startAsync({ authUrl });
+      if(type === "success"){
+        api.defaults.headers.authorization = `Bearer ${params.access_token}`;
 
-      // console.log(response);
+        const userInfo = await api.get('/users/@me');
 
-      const response = await AuthSession.startAsync({ authUrl:'https://discord.com/api/oauth2/authorize?client_id=873028732254814248&redirect_uri=https%3A%2F%2Fauth.expo.io%2Fgameplay&response_type=code&scope=identify%20email%20connections%20guilds' });
-      console.log(response);
+        const firstName = userInfo.data.username.split(' ')[0];
+        userInfo.data.avatar = `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`;
 
-      // if(type === "success"){
-      //   api.defaults.headers.authorization = `Bearer ${params.access_token}`;
-
-      //   const userInfo = await api.get('/users/@me');
-
-      //   const firstName = userInfo.data.username.split(' ')[0];
-      //   userInfo.data.avatar = `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`;
-
-      //   setUser({
-      //     ...userInfo.data,
-      //     firstName,
-      //     token: params.access_token
-      //   });
-      //   setLoading(false);
-      // }else{
-      //   setLoading(false);
-      // }
+        setUser({
+          ...userInfo.data,
+          firstName,
+          token: params.access_token
+        });
+        setLoading(false);
+      }else{
+        setLoading(false);
+      }
     } catch {
       throw new Error('Não foi possível autenticar');
     }
