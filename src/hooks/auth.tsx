@@ -3,20 +3,21 @@ import React,
   createContext,
   useContext,
   useState,
-  ReactNode
+  ReactNode,
+  useEffect
 } from 'react';
 
 import * as AuthSession from 'expo-auth-session';
-
-import {
-  SCOPE,
-  CLIENT_ID,
-  CDN_IMAGE,
-  REDIRECT_URI,
-  RESPONSE_TYPE
-} from '../configs';
-
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { api } from '../services/api';
+import { COLLECTION_USERS } from '../configs/database';
+
+const { SCOPE } = process.env;
+const { CLIENT_ID } = process.env;
+const { CDN_IMAGE } = process.env;
+const { REDIRECT_URI } = process.env;
+const { RESPONSE_TYPE } = process.env;
+
 
 type User = {
   id: string;
@@ -31,6 +32,7 @@ type AuthContextData = {
   user: User;
   loading: boolean;
   signIn: () => Promise<void>;
+  singOut: () => Promise<void>;
 }
 
 type AuthProviderProps = {
@@ -39,7 +41,8 @@ type AuthProviderProps = {
 
 type AuthorizationResponse = AuthSession.AuthSessionResult & {
   params: {
-    access_token: string;
+    access_token?: string;
+    error?: string;
   }
 }
 
@@ -54,11 +57,10 @@ function AuthProvider({ children }: AuthProviderProps) {
       setLoading(true);
 
       const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=${RESPONSE_TYPE}&scope=${SCOPE}`;
-      //const authUrl = `${api.defaults.baseURL}/oauth2/authorize?client_id=873028732254814248&redirect_uri=https%3A%2F%2Fauth.expo.io%2F%40desenvolvimentometasis%2FGamePlay&response_type=token&scope=email%20connections%20guilds%20identify`;
 
       const { type, params } = await AuthSession.startAsync({ authUrl }) as AuthorizationResponse;
 
-      if(type === "success"){
+      if (type === "success" && !params.error) {
         api.defaults.headers.authorization = `Bearer ${params.access_token}`;
 
         const userInfo = await api.get('/users/@me');
@@ -66,27 +68,53 @@ function AuthProvider({ children }: AuthProviderProps) {
         const firstName = userInfo.data.username.split(' ')[0];
         userInfo.data.avatar = `${CDN_IMAGE}/avatars/${userInfo.data.id}/${userInfo.data.avatar}.png`;
 
-        setUser({
+        const userData = {
           ...userInfo.data,
           firstName,
           token: params.access_token
-        });
-        setLoading(false);
-      }else{
-        setLoading(false);
+        };
+
+        await AsyncStorage.setItem(COLLECTION_USERS, JSON.stringify(userData));
+
+        setUser(userData);
       }
     } catch {
       throw new Error('Não foi possível autenticar');
+
+    } finally {
+      setLoading(false);
     }
   }
+
+  async function singOut() {
+    setUser({} as User);
+    await AsyncStorage.removeItem(COLLECTION_USERS);
+  }
+
+  async function loadUserDatabaseStorageData() {
+    const storage = await AsyncStorage.getItem(COLLECTION_USERS);
+
+    if (storage) {
+      const userLogged = JSON.parse(storage) as User;
+      api.defaults.headers.authorization = `Bearer ${userLogged.token}`;
+
+      setUser(userLogged);
+    }
+
+  }
+
+  useEffect(() => {
+    loadUserDatabaseStorageData()
+  }, [])
 
   return (
     <AuthContext.Provider value={{
       user,
       loading,
-      signIn
+      signIn,
+      singOut
     }}>
-      { children }
+      {children}
     </AuthContext.Provider>
   )
 }
